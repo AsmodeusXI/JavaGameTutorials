@@ -1,9 +1,16 @@
 package com.n3rddimension.gametutorial;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 
 import javax.swing.JFrame;
+
+import com.n3rddimension.gametutorial.graphics.Screen;
 
 public class Game extends Canvas implements Runnable {
 
@@ -21,10 +28,16 @@ public class Game extends Canvas implements Runnable {
 		// bool to determine status of game loop
 		private boolean running = false;
 		
+		private Screen screen;
+		
+		private BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+		
 		public Game() {
 			Dimension size = new Dimension(width * scale, height * scale);
 			setPreferredSize(size);
 			
+			screen = new Screen(width, height);
 			frame = new JFrame();
 		}
 		
@@ -33,7 +46,7 @@ public class Game extends Canvas implements Runnable {
 		public synchronized void start() {
 			running = true;
 			gameThread = new Thread(this, "Game");
-			gameThread.start();
+			gameThread.start();		// thread call starts runnable.run
 		}
 		
 		public synchronized void stop() {
@@ -49,8 +62,32 @@ public class Game extends Canvas implements Runnable {
 		// contains game loop
 		public void run() {
 			while(running) {
-				System.out.println("Running...");
+				update(); 	// updates timeboxed (so all processors the same)
+				
+				render();	// render as fast as possible
 			}
+		}
+		
+		public void update() {
+			
+		}
+		
+		public void render() {
+			BufferStrategy bs = getBufferStrategy();
+			if(bs == null) {
+				createBufferStrategy(3); // always have this at 3 -> Triple Buffering
+				return;
+			}
+			
+			Graphics g = bs.getDrawGraphics();
+			// this is the beginning of graphics happening
+			
+			g.setColor(new Color(80, 40, 100));	// shapes after this will have its color
+			g.fillRect(0, 0, getWidth(), getHeight());	// getWidth/Height ensure you get screen dimensions
+			
+			// this is the end of graphics happening
+			g.dispose(); // disposes of current graphics/releases system resources
+			bs.show(); // makes next avail buffer visible
 		}
 		
 		public static void main(String[] args) {

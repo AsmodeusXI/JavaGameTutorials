@@ -14,6 +14,8 @@ public class JavaGame extends JFrame {
 	public static int width = 500;
 	public static int height = width / 16 * 9;
 	public static int scale = 3;
+	public static int moveRate = 5;
+	public static int ballRadius = 20;
 	
 	int x, y;
 	private Image dbImage;
@@ -25,32 +27,68 @@ public class JavaGame extends JFrame {
 			int keyCode = e.getKeyCode();
 			
 			if(keyCode == KeyEvent.VK_LEFT) {
-				x-=10;
+				if(x <= 0) {
+					x = 0;
+				}
+				x-=moveRate;
 			}
 			if(keyCode == KeyEvent.VK_RIGHT) {
-				x+=10;
+				if(x >= width-ballRadius) {
+					x = width-ballRadius;
+				}
+				x+=moveRate;
 			}
 			if(keyCode == KeyEvent.VK_UP) {
-				y-=10;
+				if(y <= ballRadius) {
+					y = ballRadius;
+				}
+				y-=moveRate;
 			}
 			if(keyCode == KeyEvent.VK_DOWN) {
-				y+=10;
+				if(y >= height-ballRadius) {
+					y = height-ballRadius;
+				}
+				y+=moveRate;
 			}
 			if(keyCode == KeyEvent.VK_LEFT && keyCode == KeyEvent.VK_UP) {
-				x-=10;
-				y-=10;
+				if(x <= 0) {
+					x = 0;
+				}
+				if(y <= ballRadius) {
+					y = ballRadius;
+				}
+				x-=moveRate;
+				y-=moveRate;
 			}
 			if(keyCode == KeyEvent.VK_LEFT && keyCode == KeyEvent.VK_DOWN) {
-				x-=10;
-				y+=10;
+				if(x <= 0) {
+					x = 0;
+				}
+				if(y >= height-ballRadius) {
+					y = height-ballRadius;
+				}
+				x-=moveRate;
+				y+=moveRate;
 			}
 			if(keyCode == KeyEvent.VK_RIGHT && keyCode == KeyEvent.VK_UP) {
-				x+=10;
-				y-=10;
+				if(x >= width-ballRadius) {
+					x = width-ballRadius;
+				}
+				if(y <= ballRadius) {
+					y = ballRadius;
+				}
+				x+=moveRate;
+				y-=moveRate;
 			}
 			if(keyCode == KeyEvent.VK_RIGHT && keyCode == KeyEvent.VK_DOWN) {
-				x+=10;
-				y+=10;
+				if(x >= width-ballRadius) {
+					x = width-ballRadius;
+				}
+				if(y >= height-ballRadius) {
+					y = height-ballRadius;
+				}
+				x+=moveRate;
+				y+=moveRate;
 			}
 		}
 		
@@ -64,7 +102,7 @@ public class JavaGame extends JFrame {
 		
 		addKeyListener(new AL());	//adds user created key listener
 		setTitle("Java Game");
-		setSize(width * scale, height * scale);
+		setSize(width, height);
 		setResizable(false);
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -84,7 +122,7 @@ public class JavaGame extends JFrame {
 	
 	public void paintComponent(Graphics g) {
 		
-		g.fillOval(x, y, 15, 15);
+		g.fillOval(x, y, ballRadius, ballRadius);
 		
 		repaint();
 	}
