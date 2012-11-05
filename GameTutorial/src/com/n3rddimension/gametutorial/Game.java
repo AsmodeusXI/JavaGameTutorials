@@ -16,6 +16,8 @@ public class Game extends Canvas implements Runnable {
 
 		private static final long serialVersionUID = -5455813289201929748L;
 		
+		public static String title = "Cherno Tutorial";
+		
 		// resolution of screen vars
 		public static int width = 300;
 		public static int height = width / 16 * 9;
@@ -61,11 +63,37 @@ public class Game extends Canvas implements Runnable {
 		
 		// contains game loop
 		public void run() {
+			
+			long lastTime = System.nanoTime();	// much more precise than milliseconds
+			long timer = System.currentTimeMillis();
+			final double ns = 1000000000.0 / 60.0;
+			double delta = 0;
+			int frames = 0;
+			int updates = 0;
+			
 			while(running) {
-				update(); 	// updates timeboxed (so all processors the same)
+				
+				long now = System.nanoTime();
+				delta += (now - lastTime) / ns;
+				lastTime = now;
+				
+				while (delta >= 1) {
+					update(); 	// updates timeboxed (so all processors the same)
+					updates++;	// measures updates (should end up being 60/sec)
+					delta--;
+				}
 				
 				render();	// render as fast as possible
+				frames++;	// measures frames
+				
+				if(System.currentTimeMillis() - timer > 1000) {
+					timer += 1000;		// adds another second to timer
+					frame.setTitle(title + " | " + updates + " ups, " + frames + " fps");
+					updates = 0;
+					frames = 0;
+				}
 			}
+			stop();
 		}
 		
 		public void update() {
@@ -79,21 +107,29 @@ public class Game extends Canvas implements Runnable {
 				return;
 			}
 			
+			screen.clear();
+			screen.render();
+			
+			for (int i = 0; i < pixels.length; i++) {
+				pixels[i] = screen.pixels[i];
+			}
+			
 			Graphics g = bs.getDrawGraphics();
-			// this is the beginning of graphics happening
+			/** this is the beginning of graphics happening - in chronological order */
 			
 			g.setColor(new Color(80, 40, 100));	// shapes after this will have its color
-			g.fillRect(0, 0, getWidth(), getHeight());	// getWidth/Height ensure you get screen dimensions
+			g.fillRect(0, 0, getWidth(), getHeight());	
+			g.drawImage(image, 0, 0, getWidth(), getHeight(), null); // getWidth/Height ensure you get screen dimensions
 			
-			// this is the end of graphics happening
-			g.dispose(); // disposes of current graphics/releases system resources
-			bs.show(); // makes next avail buffer visible
+			/** this is the end of graphics happening */
+			g.dispose(); 	// disposes of current graphics/releases system resources
+			bs.show(); 		// makes next avail buffer visible
 		}
 		
 		public static void main(String[] args) {
 			Game game = new Game();
 			
-			frameInit(game, "Cherno Tutorial");
+			frameInit(game, title);
 			
 			game.start();
 		}
@@ -101,7 +137,7 @@ public class Game extends Canvas implements Runnable {
 		private static void frameInit(Game newGame, String title) {
 			
 			newGame.frame.setResizable(false);			// should be the first call on frame
-			newGame.frame.setTitle(title);
+			newGame.frame.setTitle(title);				// Sets the title before we update with UPS and FPS
 			newGame.frame.add(newGame);					// adds 'Game' Canvas Component to the JFrame
 			newGame.frame.pack();						// packs the fame to preferredSize of embedded component
 			newGame.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // deletes process on 'close' button click
